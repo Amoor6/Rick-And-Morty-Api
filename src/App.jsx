@@ -3,32 +3,42 @@ import { Characters, allCharacters } from "../data/data";
 import "./App.css";
 import CharecterDetail from "./components/CharecterDetail";
 import CharecterList from "./components/CharecterList";
-import Navbar, { SearchResult } from "./components/Navbar";
+import Navbar, { Search, SearchResult } from "./components/Navbar";
 import axios from "axios";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [characters, setCharacters] = useState(allCharacters);
   const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     async function fetchData() {
-try {
-  setIsLoading(true);
-  const {data} = await axios.get("https://rickandmortyapi.com/api/character");
-  setCharacters(data.results);
-} catch (err) {
-  console.log(err.response.data.error);
-  toast.error(err.response.data.error)
-}finally{
-  setIsLoading(false)
-}
+      try {
+        setIsLoading(true);
+        const { data } = await axios.get(
+          `https://rickandmortyapi.com/api/character?name=${query}`
+        );
+        setCharacters(data.results);
+      } catch (err) {
+        setCharacters([]);
+        toast.error(err.response.data.error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, []);
+    if (query.length < 3) {
+      setCharacters([]);
+      return;
+    }
+    fetchData();
+  }, [query]);
 
   return (
     <div className="app">
+      <Toaster />
       <Navbar>
+        <Search query={query} setQuery={setQuery} />
         <SearchResult numOfResult={characters.length} />
       </Navbar>
       <Main>
