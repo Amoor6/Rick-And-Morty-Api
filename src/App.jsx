@@ -3,7 +3,7 @@ import { Characters, allCharacters } from "../data/data";
 import "./App.css";
 import CharecterDetail from "./components/CharecterDetail";
 import CharecterList from "./components/CharecterList";
-import Navbar, { Search, SearchResult } from "./components/Navbar";
+import Navbar, { Favourites, Search, SearchResult } from "./components/Navbar";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -11,7 +11,9 @@ function App() {
   const [characters, setCharacters] = useState(allCharacters);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
-const [selectedId, setSelectedId] = useState(null)
+  const [selectedId, setSelectedId] = useState(null);
+  const [favourites, setFavourites] = useState([]);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -35,8 +37,14 @@ const [selectedId, setSelectedId] = useState(null)
   }, [query]);
 
   const handleSelectCharacter = (id) => {
-    setSelectedId(id)
+    setSelectedId((prevId) => (prevId === id ? null : id));
   };
+
+  const handleAddFavourite = (char) => {
+    setFavourites((preFav) => [...preFav, char]);
+  };
+
+ const isAddToFavourite = favourites.map((fav) => fav.id).includes(selectedId)
 
   return (
     <div className="app">
@@ -44,14 +52,20 @@ const [selectedId, setSelectedId] = useState(null)
       <Navbar>
         <Search query={query} setQuery={setQuery} />
         <SearchResult numOfResult={characters.length} />
+        <Favourites numOfFavourites={favourites.length} />
       </Navbar>
       <Main>
         <CharecterList
+          selectedId={selectedId}
           characters={characters}
           isLoading={isLoading}
           onSelectCharacter={handleSelectCharacter}
         />
-        <CharecterDetail selectedId={selectedId}/>
+        <CharecterDetail
+          selectedId={selectedId}
+          onAddFavourite={handleAddFavourite}
+          isAddToFavourite ={isAddToFavourite}
+        />
       </Main>
     </div>
   );
