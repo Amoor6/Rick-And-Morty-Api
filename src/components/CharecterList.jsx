@@ -12,7 +12,7 @@ function CharecterList({ characters, children, isLoading }) {
   return (
     <div className="characters-list">
       {characters.map((item) => (
-        <Character key={item.id} item={item} />
+        <Character key={item.id} item={item} onSelectCharacter={onSelectCharacter}/>
       ))}
     </div>
   );
@@ -20,13 +20,13 @@ function CharecterList({ characters, children, isLoading }) {
 
 export default CharecterList;
 
-function Character({ item }) {
+function Character({ item, onSelectCharacter }) {
   return (
     <div className="list__item">
       <img src={item.image} alt={item.name} />
       <CharacterName item={item} />
       <CharacterInfo item={item} />
-      <button className="icon red">
+      <button className="icon red" onClick={() => onSelectCharacter(item.id)}>
         <EyeIcon />
       </button>
     </div>
