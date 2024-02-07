@@ -1,7 +1,13 @@
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 import Loader from "./Loader";
 
-function CharecterList({ characters, children, isLoading }) {
+function CharacterList({
+  selectedId,
+  characters,
+  isLoading,
+  onSelectCharacter,
+}) {
   if (isLoading)
     return (
       <div className="characters-list">
@@ -12,37 +18,37 @@ function CharecterList({ characters, children, isLoading }) {
   return (
     <div className="characters-list">
       {characters.map((item) => (
-        <Character
-          selectedId={selectedId}
-          key={item.id}
-          item={item}
-          onSelectCharacter={onSelectCharacter}
-        />
+        <Character key={item.id} item={item}>
+          <button
+            className="icon red"
+            onClick={() => onSelectCharacter(item.id)}
+          >
+            {selectedId === item.id ? <EyeSlashIcon /> : <EyeIcon />}
+          </button>
+        </Character>
       ))}
     </div>
   );
 }
 
-export default CharecterList;
+export default CharacterList;
 
-function Character({ item, onSelectCharacter, selectedId }) {
+export function Character({ item, children }) {
   return (
     <div className="list__item">
       <img src={item.image} alt={item.name} />
-      <CharacterName item={item} />
+      <CharaterName item={item} />
       <CharacterInfo item={item} />
-      <button className="icon red" onClick={() => onSelectCharacter(item.id)}>
-        {selectedId === item.id ? <EyeSlashIcon /> : <EyeIcon />}
-      </button>
+      {children}
     </div>
   );
 }
 
-function CharacterName({ item }) {
+function CharaterName({ item }) {
   return (
     <h3 className="name">
-      <span>{item.gender === "Male" ? "👦" : "👧"}</span>
-      <span>{item.name}</span>
+      <span>{item.gender === "Male" ? "👱🏻‍♂️" : "👩🏻‍🦳"}</span>
+      <span> {item.name}</span>
     </h3>
   );
 }
@@ -50,8 +56,8 @@ function CharacterName({ item }) {
 function CharacterInfo({ item }) {
   return (
     <div className="list-item__info info">
-      <span className={`status${item.status === "Dead" ? "red" : ""}`}></span>
-      <span>{item.status} </span>
+      <span className={`status ${item.status === "Dead" ? "red" : ""}`}></span>
+      <span> {item.status} </span>
       <span> - {item.species}</span>
     </div>
   );

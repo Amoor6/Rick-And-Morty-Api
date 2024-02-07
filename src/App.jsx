@@ -1,40 +1,30 @@
 import { useEffect, useState } from "react";
-import { Characters, allCharacters } from "../data/data";
 import "./App.css";
-import CharecterDetail from "./components/CharecterDetail";
-import CharecterList from "./components/CharecterList";
+import CharacterDetail from "./components/CharecterDetail"
+import CharacterList from "./components/CharecterList";
 import Navbar, { Favourites, Search, SearchResult } from "./components/Navbar";
-import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import useCharacters from "./hooks/useCharacter";
+import useLocalStorage from "./hooks/useLocalStorage";
 
 function App() {
-  const [characters, setCharacters] = useState(allCharacters);
-  const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
+  const [count, setCount] = useState(0);
+  const { characters, isLoading } = useCharacters(
+    "https://rickandmortyapi.com/api/character/?name",
+    query
+  );
   const [selectedId, setSelectedId] = useState(null);
-  const [favourites, setFavourites] = useState([]);
+  const [favourites, setFavourites] = useLocalStorage("FAVOURITES", []);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setIsLoading(true);
-        const { data } = await axios.get(
-          `https://rickandmortyapi.com/api/character?name=${query}`
-        );
-        setCharacters(data.results);
-      } catch (err) {
-        setCharacters([]);
-        toast.error(err.response.data.error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    if (query.length < 3) {
-      setCharacters([]);
-      return;
-    }
-    fetchData();
-  }, [query]);
+    const interval = setInterval(() => setCount((c) => c + 1), 1000);
+    // return function(){}
+    return () => {
+      clearInterval(interval);
+    };
+  }, [count]);
+ 
 
   const handleSelectCharacter = (id) => {
     setSelectedId((prevId) => (prevId === id ? null : id));
@@ -44,7 +34,11 @@ function App() {
     setFavourites((preFav) => [...preFav, char]);
   };
 
- const isAddToFavourite = favourites.map((fav) => fav.id).includes(selectedId)
+  const handleDeleteFavourite = (id) => {
+    setFavourites((preFav) => preFav.filter((fav) => fav.id !== id));
+  };
+
+  const isAddToFavourite = favourites.map((fav) => fav.id).includes(selectedId);
 
   return (
     <div className="app">
@@ -52,19 +46,22 @@ function App() {
       <Navbar>
         <Search query={query} setQuery={setQuery} />
         <SearchResult numOfResult={characters.length} />
-        <Favourites numOfFavourites={favourites.length} />
+        <Favourites
+          favourites={favourites}
+          onDeleteFavourite={handleDeleteFavourite}
+        />
       </Navbar>
       <Main>
-        <CharecterList
+        <CharacterList
           selectedId={selectedId}
           characters={characters}
           isLoading={isLoading}
           onSelectCharacter={handleSelectCharacter}
         />
-        <CharecterDetail
+        <CharacterDetail
           selectedId={selectedId}
           onAddFavourite={handleAddFavourite}
-          isAddToFavourite ={isAddToFavourite}
+          isAddToFavourite={isAddToFavourite}
         />
       </Main>
     </div>
